@@ -4,21 +4,9 @@
 
 package net.snowflake.client.core;
 
-import static net.snowflake.client.core.SFTrustManager.resetOCSPResponseCacherServerURL;
-import static net.snowflake.client.jdbc.SnowflakeUtil.systemGetProperty;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.snowflake.client.jdbc.*;
 import net.snowflake.client.jdbc.telemetryOOB.TelemetryService;
 import net.snowflake.client.log.ArgSupplier;
@@ -39,6 +27,19 @@ import org.apache.http.message.HeaderGroup;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static net.snowflake.client.core.SFTrustManager.resetOCSPResponseCacherServerURL;
+import static net.snowflake.client.jdbc.SnowflakeUtil.systemGetProperty;
 
 /** Low level session util */
 public class SessionUtil {
@@ -100,6 +101,8 @@ public class SessionUtil {
       "CLIENT_METADATA_REQUEST_USE_CONNECTION_CTX";
   public static final String CLIENT_METADATA_USE_SESSION_DATABASE =
       "CLIENT_METADATA_USE_SESSION_DATABASE";
+  public static final String CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT =
+          "CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT";
 
   static final String SF_HEADER_SERVICE_NAME = "X-Snowflake-Service";
 
@@ -1337,6 +1340,10 @@ public class SessionUtil {
       } else if (CLIENT_VALIDATE_DEFAULT_PARAMETERS.equalsIgnoreCase(entry.getKey())) {
         if (session != null) {
           session.setValidateDefaultParameters(SFLoginInput.getBooleanValue(entry.getValue()));
+        }
+      } else if (CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT.equalsIgnoreCase(entry.getKey())) {
+        if (session != null) {
+          session.setValidateDefaultParameters((long) entry.getValue());
         }
       }
     }

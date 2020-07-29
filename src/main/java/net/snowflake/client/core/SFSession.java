@@ -1388,6 +1388,10 @@ public class SFSession {
     validateDefaultParameters = v;
   }
 
+  public void setMultipartUploadThreshold(long  v) {
+    validateDefaultParameters = v;
+  }
+
   private SnowflakeConnectString sfConnStr;
 
   public void setSnowflakeConnectionString(SnowflakeConnectString connStr) {
