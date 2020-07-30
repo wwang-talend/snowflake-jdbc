@@ -1343,7 +1343,7 @@ public class SessionUtil {
         }
       } else if (CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT.equalsIgnoreCase(entry.getKey())) {
         if (session != null) {
-          session.setValidateDefaultParameters((long) entry.getValue());
+          session.setMultipartUploadThreshold((int) entry.getValue());
         }
       }
     }

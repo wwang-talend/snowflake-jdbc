@@ -81,7 +81,10 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
   private Set<String> smallSourceFiles;
 
   /* Default value, in bytes (200 mb) */
-  private static int BIG_FILE_THRESHOLD = 200000000;
+  private int multipartUploadThreshold = 200000000;
+
+  /* Temporary multipart threshold, able to set in individual put commands */
+  private int tempMultiPartUploadThreshold = -1;
 
   private Map<String, FileMetadata> fileMetadataMap;
 
@@ -139,6 +142,10 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
 
   public String getStageLocation() {
     return stageInfo.getLocation();
+  }
+
+  public int getMultipartUploadThreshold() {
+    return multipartUploadThreshold;
   }
 
   private void initEncryptionMaterial(CommandType commandType, JsonNode jsonNode)
@@ -823,6 +830,7 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
     this.session = session;
     this.statement = statement;
     this.statusRows = new ArrayList<>();
+    this.multipartUploadThreshold = session.getMultipartUploadThreshold();
 
     // parse the command
     logger.debug("Start parsing");
@@ -881,8 +889,16 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
     if (thresholdNode != null)
     {
       int threshold = thresholdNode.asInt();
+      // if value is 0 or a negative number, this means an error was made in parsing the threshold.
+      if (threshold <= 0)
+      {
+        throw new SnowflakeSQLException(
+                SqlState.INVALID_PARAMETER_VALUE,
+                ErrorCode.INVALID_PARAMETER_TYPE.getMessageCode(),
+                "unknown", "positive int");
+      }
       // threshold put in megabytes, so multiply value by 1*10^6 to get byte value
-      BIG_FILE_THRESHOLD = threshold * 1000000;
+      tempMultiPartUploadThreshold = threshold;
     }
 
     showEncryptionParameter =
@@ -1589,8 +1605,13 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
   }
 
   private void segregateFilesBySize() {
+    // if PUT statement specifies threshold, override general session threshold
+    if (tempMultiPartUploadThreshold != -1)
+    {
+      multipartUploadThreshold = tempMultiPartUploadThreshold;
+    }
     for (String srcFile : sourceFiles) {
-      if ((new File(srcFile)).length() > BIG_FILE_THRESHOLD) {
+      if ((new File(srcFile)).length() > multipartUploadThreshold) {
         if (bigSourceFiles == null) {
           bigSourceFiles = new HashSet<String>(sourceFiles.size());
         }
