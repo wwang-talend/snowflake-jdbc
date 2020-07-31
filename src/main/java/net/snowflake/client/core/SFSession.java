@@ -217,8 +217,8 @@ public class SFSession {
   // validate the default parameters by GS?
   private boolean validateDefaultParameters;
 
-  // threshold for uploading file in multiple chunks for put commands
-  private int multipartUploadThreshold = 200000000;
+  // threshold for uploading file in multiple chunks for put commands. Default 200MB
+  private int multipartUploadThreshold = 200;
 
   // list of active asynchronous queries. Used to see if session should be closed when connection
   // closes

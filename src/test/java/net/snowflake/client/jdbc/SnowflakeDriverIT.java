@@ -876,8 +876,10 @@ public class SnowflakeDriverIT extends BaseJDBCTest {
   @Test
   @ConditionalIgnoreRule.ConditionalIgnore(condition = RunningOnGithubAction.class)
   public void testPutGetLargeFileGCP() throws Throwable {
-    Connection connection = getConnection("gcpaccount");
+    Connection connection = getConnection();
     Statement statement = connection.createStatement();
+    statement.execute("alter session set JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true");
+    statement.execute("alter session set CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT=123");
 
     File destFolder = tmpFolder.newFolder();
     String destFolderCanonicalPath = destFolder.getCanonicalPath();
@@ -1028,11 +1030,11 @@ public class SnowflakeDriverIT extends BaseJDBCTest {
   {
     Connection con = getConnection();
     Statement statement = con.createStatement();
-    statement.execute("alter session set CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT=12345");
-    SnowflakeFileTransferAgent agent = new SnowflakeFileTransferAgent("put file:///tmpfile.csv", con.unwrap(SnowflakeConnectionV1.class).getSfSession(), statement.unwrap(SFStatement.class));
-    assertEquals(12345,agent.getMultipartUploadThreshold());
-    statement.execute("put file:///tmpfile.csv @tmpstage threshold = 500000");
-    assertEquals(500000, agent.getMultipartUploadThreshold());
+    statement.execute("alter session set CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT=123");
+    SnowflakeFileTransferAgent agent = new SnowflakeFileTransferAgent("put file:///tmpfile.csv", con.unwrap(SnowflakeConnectionV1.class).getSfSession(), statement.unwrap(SnowflakeStatementV1.class).getSfStatement());
+    assertEquals(123, agent.getMultipartUploadThreshold());
+    statement.execute("put file:///tmpfile.csv @tmpstage threshold = 500");
+    assertEquals(500, agent.getMultipartUploadThreshold());
   }
 
   @Test
