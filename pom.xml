@@ -307,11 +307,6 @@
       <artifactId>jna-platform</artifactId>
       <version>${jna.version}</version>
     </dependency>
-    <dependency>
-      <groupId>net.snowflake</groupId>
-      <artifactId>snowflake-common</artifactId>
-      <version>4.0.0</version>
-    </dependency>
   </dependencies>
 
   <build>
