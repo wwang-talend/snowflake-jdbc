@@ -1026,18 +1026,6 @@ public class SnowflakeDriverIT extends BaseJDBCTest {
   }
 
   @Test
-  public void testMultiPartUploadThreshold() throws SQLException
-  {
-    Connection con = getConnection();
-    Statement statement = con.createStatement();
-    statement.execute("alter session set CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT=123");
-    SnowflakeFileTransferAgent agent = new SnowflakeFileTransferAgent("put file:///tmpfile.csv", con.unwrap(SnowflakeConnectionV1.class).getSfSession(), statement.unwrap(SnowflakeStatementV1.class).getSfStatement());
-    assertEquals(123, agent.getMultipartUploadThreshold());
-    statement.execute("put file:///tmpfile.csv @tmpstage threshold = 500");
-    assertEquals(500, agent.getMultipartUploadThreshold());
-  }
-
-  @Test
   @ConditionalIgnoreRule.ConditionalIgnore(condition = RunningOnGithubAction.class)
   public void testPutOverwriteFalseNoDigest() throws Throwable {
     Connection connection = null;
