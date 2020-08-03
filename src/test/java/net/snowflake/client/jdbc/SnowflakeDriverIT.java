@@ -3,8 +3,50 @@
  */
 package net.snowflake.client.jdbc;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.*;
+import java.math.BigDecimal;
+import java.nio.channels.FileChannel;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Properties;
+import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 import net.snowflake.client.AbstractDriverIT;
 import net.snowflake.client.ConditionalIgnoreRule;
 import net.snowflake.client.RunningOnGithubAction;
@@ -15,26 +57,13 @@ import net.snowflake.client.core.SFStatement;
 import net.snowflake.common.core.SqlState;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
-
-import java.io.*;
-import java.math.BigDecimal;
-import java.nio.channels.FileChannel;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.GZIPInputStream;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 
 /** General integration tests */
 @Category(TestCategoryOthers.class)
@@ -876,10 +905,8 @@ public class SnowflakeDriverIT extends BaseJDBCTest {
   @Test
   @ConditionalIgnoreRule.ConditionalIgnore(condition = RunningOnGithubAction.class)
   public void testPutGetLargeFileGCP() throws Throwable {
-    Connection connection = getConnection();
+    Connection connection = getConnection("gcpaccount");
     Statement statement = connection.createStatement();
-    statement.execute("alter session set JDBC_TREAT_TIMESTAMP_NTZ_AS_UTC=true");
-    statement.execute("alter session set CLIENT_MULTIPART_UPLOAD_THRESHOLD_IN_PUT=123");
 
     File destFolder = tmpFolder.newFolder();
     String destFolderCanonicalPath = destFolder.getCanonicalPath();
