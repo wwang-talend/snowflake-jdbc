@@ -83,9 +83,6 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
   /* Default value, in bytes */
   private int multipartUploadThreshold = 200 * 1024 * 1024;
 
-  /* Temporary multipart threshold, able to set in individual put commands */
-  private int tempMultiPartUploadThreshold = -1;
-
   private Map<String, FileMetadata> fileMetadataMap;
 
   // stage related info
@@ -896,7 +893,7 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
                 "unknown", "positive integer");
       }
       // convert from megabytes to bytes
-      tempMultiPartUploadThreshold = threshold * 1024 * 1024;
+      multipartUploadThreshold = threshold * 1024 * 1024;
     }
 
     showEncryptionParameter =
@@ -1603,11 +1600,6 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
   }
 
   private void segregateFilesBySize() {
-    // if PUT statement specifies threshold, override general session threshold
-    if (tempMultiPartUploadThreshold != -1)
-    {
-      multipartUploadThreshold = tempMultiPartUploadThreshold;
-    }
     for (String srcFile : sourceFiles) {
       if ((new File(srcFile)).length() > (multipartUploadThreshold)) {
         if (bigSourceFiles == null) {
