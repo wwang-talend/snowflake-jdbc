@@ -79,8 +79,8 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
   // with 4 threads by default
   private Set<String> smallSourceFiles;
 
-  /* Default value, in bytes */
-  private int multipartUploadThreshold = 200 * 1024 * 1024;
+  /* Threshold for splitting a file to upload multiple parts in parallel */
+  private int multipartUploadThreshold;
 
   private Map<String, FileMetadata> fileMetadataMap;
 
@@ -879,20 +879,18 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
     }
 
     JsonNode thresholdNode = jsonNode.path("data").path("threshold");
-    if (thresholdNode != null) {
-      int threshold = thresholdNode.asInt();
-      // if value is 0, this means an error was made in parsing the threshold.
-      if (threshold == 0) {
-        throw new SnowflakeSQLLoggedException(
-            SqlState.INVALID_PARAMETER_VALUE,
-            ErrorCode.INVALID_PARAMETER_TYPE.getMessageCode(),
-            session,
-            "unknown",
-            "positive integer");
-      }
+    int threshold = thresholdNode.asInt();
+    // if value is 0, this means an error was made in parsing the threshold.
+    if (threshold == 0) {
+      throw new SnowflakeSQLLoggedException(
+          SqlState.INVALID_PARAMETER_VALUE,
+          ErrorCode.INVALID_PARAMETER_TYPE.getMessageCode(),
+          session,
+          "unknown",
+          "positive integer");
       // convert from megabytes to bytes
-      multipartUploadThreshold = threshold * 1024 * 1024;
     }
+    multipartUploadThreshold = threshold * 1024 * 1024;
 
     showEncryptionParameter =
         jsonNode.path("data").path("clientShowEncryptionParameter").asBoolean();
