@@ -883,9 +883,9 @@ public class SnowflakeFileTransferAgent implements SnowflakeFixedView {
     // if value is 0, this means an error was made in parsing the threshold.
     if (threshold == 0) {
       throw new SnowflakeSQLLoggedException(
-          SqlState.INVALID_PARAMETER_VALUE,
-          ErrorCode.INVALID_PARAMETER_TYPE.getMessageCode(),
           session,
+          ErrorCode.INVALID_PARAMETER_TYPE.getMessageCode(),
+          SqlState.INVALID_PARAMETER_VALUE,
           "unknown",
           "positive integer");
       // convert from megabytes to bytes
